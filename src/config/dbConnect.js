@@ -1,6 +1,7 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-mongoose.connect("mongodb+srv://admin:admin123@cluster0.ta7bnpx.mongodb.net/");
+mongoose.connect(process.env.STRING_CONEXAO_BD);
+
 let db = mongoose.connection;
 
 export default db;

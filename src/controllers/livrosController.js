@@ -12,7 +12,7 @@ class LivroController {
     } catch (erro) {
       res.status(500).json({ message: "Erro interno no servidor" });
     }
-  }
+  };
 
   static listarLivroPorId = async (req, res) => {
     try {
@@ -26,7 +26,7 @@ class LivroController {
     } catch (erro) {
       res.status(400).send({message: `${erro.message} - Id do livro não localizado.`});
     }
-  }
+  };
 
   static cadastrarLivro = async (req, res) => {
     try {
@@ -38,7 +38,7 @@ class LivroController {
     } catch (erro) {
       res.status(500).send({message: `${erro.message} - falha ao cadastrar livro.`});
     }
-  }
+  };
 
   static atualizarLivro = async (req, res) => {
     try {
@@ -50,7 +50,7 @@ class LivroController {
     } catch (erro) {
       res.status(500).send({message: erro.message});
     }
-  }
+  };
 
   static excluirLivro = async (req, res) => {
     try {
@@ -62,7 +62,7 @@ class LivroController {
     } catch (erro) {
       res.status(500).send({message: erro.message});
     }
-  }
+  };
 
   static listarLivroPorEditora = async (req, res) => {
     try {
@@ -74,10 +74,10 @@ class LivroController {
     } catch (erro) {
       res.status(500).json({ message: "Erro interno no servidor" });
     }
-  }
+  };
 
 
 
 }
 
-export default LivroController
+export default LivroController;
