@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import autores from "../models/Autor.js";
 
 class AutorController {
@@ -14,15 +15,21 @@ class AutorController {
   };
 
   static listarAutorPorId = async (req, res) => {
-    
     try {
       const id = req.params.id;
-  
       const autorResultado = await autores.findById(id);
-  
-      res.status(200).send(autorResultado);
+      if(!autorResultado){//404 para quando um id não é localizado
+        res.status(404).send({message: 'ID do usuario não localizado'});
+      }else{
+        res.status(200).send(autorResultado);
+      }
     } catch (erro) {
-      res.status(400).send({message: `${erro.message} - Id do Autor não localizado.`});
+      //O mongose usa 24 caracteres para ID então quando passamos algo diferente ele nos responde com esse erro
+      if(erro instanceof mongoose.Error.CastError) {
+        res.status(400).send({message: "Um ou mais dados foram passados de maneira errada"})
+      }else{
+        res.status(500).send({message: "Erro interno de servidor"});
+      }
     }
   };
   
