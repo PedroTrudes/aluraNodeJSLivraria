@@ -1,15 +1,19 @@
 import mongoose from "mongoose";
+import ErroBase from "../erros/ErroBase.js"
+import RequisicaoIncorreta from "../erros/RequisicaoIncorreta.js";
+import ErroValidacao from "../erros/ErroValidacao.js";
+import NaoEncontrado from "../erros/NaoEncontrado.js";
 
 //eles interceptan a req antes de ser feito de fato a chamada ((middlewares de erros))
 function manipuladorDeErros(erro, req, res, next) {
-    //O mongose usa 24 caracteres para ID então quando passamos algo diferente ele nos responde com esse erro
     if(erro instanceof mongoose.Error.CastError) {
-        res.status(400).send({message: "Um ou mais dados foram passados de maneira errada"})
+        new RequisicaoIncorreta().enviarResposta(res);
     }else if(erro instanceof mongoose.Error.ValidationError) {
-        const messagesErro = Object.values(erro.errors).map(erro => erro.message).join("; "); 
-        res.status(400).send({message: "Um ou mais campos obrigatorios", errorName: messagesErro});
-    }else {
-        res.status(500).send({message: "Erro interno de servidor"});
+        new ErroValidacao(erro).enviarResposta(res)
+    }else if (erro instanceof NaoEncontrado){
+        erro.enviarResposta(res);
+    }else{
+        new ErroBase().enviarResposta(res);
     }
 }
 

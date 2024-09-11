@@ -1,7 +1,7 @@
+import NaoEncontrado from "../erros/NaoEncontrado.js";
 import livros from "../models/Livro.js";
 
 class LivroController {
-
   static listarLivros = async (req, res, next) => {
     try {
       const livrosResultado = await livros.find()
@@ -19,7 +19,11 @@ class LivroController {
       const livroResultados = await livros.findById(id)
         .populate("autor", "nome")
         .exec();
-      res.status(200).send(livroResultados);
+        if(!livroResultados){
+          next(new NaoEncontrado("Id não localizado"))
+        }else{
+          res.status(200).send(livroResultados);
+        }
     } catch (erro) {
       next(erro)
     }
@@ -38,8 +42,12 @@ class LivroController {
   static atualizarLivro = async (req, res, next) => {
     try {
       const id = req.params.id;
-      await livros.findByIdAndUpdate(id, {$set: req.body});
-      res.status(200).send({message: "Livro atualizado com sucesso"});
+      const livroId = await livros.findByIdAndUpdate(id, {$set: req.body});
+      if(!livroId){
+        next(new NaoEncontrado("Id não localizado"));
+      }else{
+        res.status(200).send({message: "Livro atualizado com sucesso"});
+      }
     } catch (erro) {
       next(erro)
     }
@@ -48,8 +56,12 @@ class LivroController {
   static excluirLivro = async (req, res, next) => {
     try {
       const id = req.params.id;
-      await livros.findByIdAndDelete(id);
-      res.status(200).send({message: "Livro removido com sucesso"});
+      const livroId = await livros.findByIdAndDelete(id);
+      if(!livroId){
+        next(new NaoEncontrado("Id não localizado"));
+      }else{
+        res.status(200).send({message: "Livro removido com sucesso"});
+      }
     } catch (erro) {
       next(erro)
     }
@@ -59,7 +71,11 @@ class LivroController {
     try {
       const editora = req.query.editora;
       const livrosResultado = await livros.find({"editora": editora});
-      res.status(200).send(livrosResultado);
+      if(livrosResultado !== null){
+        res.status(200).send(livrosResultado);//Ajustar o erro
+      }else{
+        res.status(404).send({message: "Editora não localizada"})
+      }
     } catch (erro) {
       next(erro)
     }
