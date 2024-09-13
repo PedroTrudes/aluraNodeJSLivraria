@@ -66,6 +66,29 @@ class AutorController {
       next(erro)
     }
   };
+
+  static listarAutorPorFiltro = async (req, res, next) => {
+    try {
+      const { nome, nacionalidade } = req.query;
+      const regex = new RegExp({nome, nacionalidade}, "i")
+      const buscaAutor = {}
+      if(nome) {
+        buscaAutor.nome = regex
+      }
+      if(nacionalidade) {
+        buscaAutor.nacionalidade = regex
+      }
+      const autoresResultados = await autores.find(buscaAutor);
+      if(autoresResultados !== null){
+        res.status(200).send(autoresResultados);
+      }else{
+        res.status(404).send({message: "Dados não localizados"})
+      }
+
+    } catch (erro) {
+      next(erro)
+    }
+  }
   
 
 }

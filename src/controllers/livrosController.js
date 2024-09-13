@@ -70,20 +70,22 @@ class LivroController {
   static listarLivroPorFiltro = async (req, res, next) => {
     try {
       const {editora, titulo} = req.query;
+      const regex = new RegExp(titulo, "i")//fazendo regex de forma nativa do JS
+
       //Filtrando a nossa REQ pelo query
       const busca = {}
       if(editora) {
-        busca.editora = editora
+        busca.editora = { $regex: editora, $options: "i"}//fazendo REGEX nativo do mongoose
       }
-      if (titulo){
-        busca.titulo = titulo
+      if(titulo){
+        busca.titulo = regex
       }
       //find pegando do objeito que vem dentro de busca
       const livrosResultado = await livros.find(busca);
       if(livrosResultado !== null){
         res.status(200).send(livrosResultado);//Ajustar o erro
       }else{
-        res.status(404).send({message: "Editora não localizada"})
+        res.status(404).send({message: "Dados não localizados"})
       }
     } catch (erro) {
       next(erro)
