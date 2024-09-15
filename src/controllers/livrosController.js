@@ -1,5 +1,5 @@
 import NaoEncontrado from "../erros/NaoEncontrado.js";
-import {livros} from "../models/index.js";
+import {autores, livros} from "../models/index.js";
 
 class LivroController {
   static listarLivros = async (req, res, next) => {
@@ -69,31 +69,57 @@ class LivroController {
 
   static listarLivroPorFiltro = async (req, res, next) => {
     try {
-      const {editora, titulo, minPaginas, maxPaginas} = req.query;
-      const regex = new RegExp(titulo, "i")//fazendo regex de forma nativa do JS
-
-      //Filtrando a nossa REQ pelo query
-      const busca = {}
-      if(editora) {
-        busca.editora = { $regex: editora, $options: "i"}//fazendo REGEX nativo do mongoose
-      }
-      if(titulo){
-        busca.titulo = regex
-      }
-      if(minPaginas || maxPaginas){
-        busca.numeroPaginas = {$gte: minPaginas, $lte: maxPaginas}
+      const busca = await processaBusca(req.query)
+      if(busca !== null){
+        const livrosResultado = await livros.find(busca).populate("autor");
+        if(livrosResultado !== null){ 
+          res.status(200).send(livrosResultado);//Ajustar o erro
+        }else{
+          res.status(404).send({message: "Dados não localizados"})
+        }
+      }else{
+        res.status(200).send([])
       }
       //find pegando do objeito que vem dentro de busca
-      const livrosResultado = await livros.find(busca);
-      if(livrosResultado !== null){
-        res.status(200).send(livrosResultado);//Ajustar o erro
-      }else{
-        res.status(404).send({message: "Dados não localizados"})
-      }
     } catch (erro) {
       next(erro)
     }
   };
+}
+
+async function processaBusca(parametros) {
+  const {editora, titulo, minPaginas, maxPaginas, nomeAutor} = parametros;
+  const regex = new RegExp(titulo, "i")//fazendo regex de forma nativa do JS
+
+  //Filtrando a nossa REQ pelo query
+  let busca = {}
+
+  
+
+  if(editora) {
+    busca.editora = { $regex: editora, $options: "i"}//fazendo REGEX nativo do mongoose
+  }
+  if(titulo){
+    busca.titulo = regex
+  }
+  if(minPaginas || maxPaginas){
+    busca.numeroPaginas = {};
+  }
+  
+  if(minPaginas) busca.numeroPaginas.$gte = minPaginas
+  if(maxPaginas) busca.numeroPaginas.$lte = maxPaginas
+   
+  if(nomeAutor) {
+    const autor = await autores.findOne({ nome: nomeAutor});
+    if(autor !== null) {
+      const autorId = autor._id;
+      busca.autor = autorId;
+    }else{
+      busca = null
+    }
+  }
+  
+  return busca
 }
 
 export default LivroController;
