@@ -1,13 +1,27 @@
 import NaoEncontrado from "../erros/NaoEncontrado.js";
 import {autores, livros} from "../models/index.js";
+import RequisicaoIncorreta from "../erros/RequisicaoIncorreta.js";
 
 class LivroController {
   static listarLivros = async (req, res, next) => {
     try {
-      const livrosResultado = await livros.find()
-        .populate("autor", "nome")
-        .exec();
-      res.status(200).json(livrosResultado);
+      let {limite = 5, pagina = 1} = req.query;
+       limite = parseInt(limite);
+       pagina = parseInt(pagina);
+       //metodos do banco
+       // skyp numero de paginas que vão ser puladas
+       //limit é o limite de livros por pagina
+       //populate pega dados de uma FK no banco
+       if(limite > 0 && pagina > 0){
+         const livrosResultado = await livros.find()
+           .skip((pagina - 1) * limite)
+           .limit(limite)
+           .populate("autor", "nome")
+           .exec();
+         res.status(200).json(livrosResultado);
+       }else(
+        next(new RequisicaoIncorreta())
+       ) 
     } catch (erro) {
       next(erro)
     }

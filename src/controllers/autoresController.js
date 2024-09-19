@@ -40,7 +40,6 @@ class AutorController {
   static atualizarAutor = async (req, res, next) => {
     try {
       const id = req.params.id;
-  
       const autoresId = await autores.findByIdAndUpdate(id, {$set: req.body});
       if(!autoresId){
         next(new NaoEncontrado("Id não localizado"))
